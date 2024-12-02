@@ -21,12 +21,12 @@ export default function FunctionDomainInput({ onInputUpdate }: FunctionDomainInp
 				lowerBound: isLowerInfinity ? -Infinity : lowerBound,
 				upperBound: isUpperInfinity ? Infinity : upperBound,
 				isLowerInclusive,
-				isUpperInclusive,
-				isLowerInfinity,
-				isUpperInfinity
+				isUpperInclusive
 			};
 			onInputUpdate(event);
 		}
+
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [lowerBound, upperBound, isLowerInclusive, isUpperInclusive, isLowerInfinity, isUpperInfinity]);
 
 	const getDomainNotation = () => {

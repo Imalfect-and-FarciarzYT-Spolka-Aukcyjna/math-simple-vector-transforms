@@ -4,7 +4,8 @@ import './globals.css';
 
 const inter = Inter({
 	style: 'normal',
-	weight: ['400', '700']
+	weight: ['400', '700'],
+	subsets: ['latin']
 });
 
 export const metadata: Metadata = {

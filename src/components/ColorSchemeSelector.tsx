@@ -17,6 +17,7 @@ export default function ColorSchemeSelector({ onColorUpdate }: ColorSchemeSelect
 			};
 			onColorUpdate(event);
 		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [originalColor, transformedColor]);
 
 	return (
