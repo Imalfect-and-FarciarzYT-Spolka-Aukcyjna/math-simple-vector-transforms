@@ -11,7 +11,7 @@ import { useState } from 'react';
 
 export default function VectorTransformationApp() {
 	const [transformFunction, setTransformFunction] = useState('x^2');
-	const [originalColor, setOriginalColor] = useState('#3B82F6');
+	const [, setOriginalColor] = useState('#3B82F6');
 	const [transformedColor, setTransformedColor] = useState('#10B981');
 	const [domain, setDomain] = useState({
 		lowerBound: 0,
