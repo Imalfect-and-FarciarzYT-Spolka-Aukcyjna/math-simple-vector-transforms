@@ -1,34 +1,53 @@
 'use client';
 
-import ColorSchemeSelector from '@/components/ColorSchemeSelector';
 import FunctionDomainInput from '@/components/FunctionDomainInput';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import showFunction from '@/util/showFunction';
-import { useState } from 'react';
+import renderFunctions from '@/util/renderFunctions';
+import { useEffect, useState } from 'react';
+import functionBreakdown from '@/processor/functions/functionBreakdown';
+import TransformationsTable from '@/components/TransformationsTable';
+import { ExtendedTransformation } from '@/types/breakdown';
+import { Loader } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
+import generateRandomHexColor from '@/util/generateRandomHexColor';
 
 export default function VectorTransformationApp() {
 	const [transformFunction, setTransformFunction] = useState('x^2');
-	const [, setOriginalColor] = useState('#3B82F6');
-	const [transformedColor, setTransformedColor] = useState('#10B981');
+	const [funMode, setFunMode] = useState(false);
 	const [domain, setDomain] = useState({
 		lowerBound: 0,
 		upperBound: 10,
 		isLowerInclusive: true,
 		isUpperInclusive: true
 	});
-	const handleGenerate = () => {
-		// Placeholder for generate functionality
-		console.log(transformFunction);
-		console.log(transformedColor);
-		console.log([domain.lowerBound, domain.upperBound]);
-		showFunction(transformFunction, transformedColor, [
-			domain.lowerBound !== null ? domain.lowerBound : -Infinity,
-			domain.upperBound !== null ? domain.upperBound : Infinity
-		]);
-	};
+	const [breakdown, setBreakdown] = useState<{
+		originalFunction: string;
+		transformations: ExtendedTransformation[];
+	}>();
+	const handleBreakdown = async () => {
+		setLoading(true);
+		const bd = await functionBreakdown(transformFunction, funMode);
+		bd.transformations = bd.transformations.map((t, i) => {
+			return {
+				...t,
+				id: i.toString(),
+				color: generateRandomHexColor(),
+				visible: true
+			};
+		});
+		setBreakdown(bd as {
+			originalFunction: string;
+			transformations: ExtendedTransformation[];
+		});
+		setLoading(false);
+	}
+	const [loading, setLoading] = useState(false);
+	useEffect(() => {
+		renderFunctions(breakdown?.transformations.filter((bd) => bd.visible) || [], [domain.lowerBound, domain.upperBound]);
+	}, [breakdown, domain]);
 	return (
 		<div className="mx-6 mt-6 space-y-8 md:mx-12">
 			<h1 className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-center text-4xl font-bold text-transparent">
@@ -62,14 +81,9 @@ export default function VectorTransformationApp() {
 										});
 									}}
 								/>
-								<ColorSchemeSelector
-									onColorUpdate={(e) => {
-										setOriginalColor(e.originalColor);
-										setTransformedColor(e.transformedColor);
-									}}
-								/>
 							</div>
-							<Button onClick={handleGenerate} className="w-full">
+							<Button onClick={handleBreakdown} className="w-full" disabled={loading}>
+								{loading && <Loader className="animate-ping" />}
 								Generate Transformation
 							</Button>
 						</CardContent>
@@ -80,11 +94,14 @@ export default function VectorTransformationApp() {
 							<CardTitle>Transformation Steps</CardTitle>
 						</CardHeader>
 						<CardContent>
-							<div className="min-h-[200px] rounded-lg border bg-gray-50 p-4">
-								<p className="text-gray-500">
-									Step-by-step transformation will be displayed here using KaTeX.
-								</p>
-							</div>
+						<TransformationsTable transformations={breakdown?.transformations || []} setTransformations={(transformations) => {
+							if (breakdown) {
+								setBreakdown({
+									...breakdown,
+									transformations
+								});
+							}
+						}}/>
 						</CardContent>
 					</Card>
 				</div>
@@ -103,8 +120,12 @@ export default function VectorTransformationApp() {
 			</div>
 
 			<footer className="mt-8 text-center text-sm text-gray-500">
-				© 2024 Farciarzyt Imalfect 19+ Corporation Spółka Aukcyjna Holding Limited Incorporated. All
+				© 2025 Farciarzyt Imalfect 19+ Corporation Spółka Aukcyjna Holding Limited Incorporated. All
 				rights reserved.
+				<div className={'flex justify-center items-center gap-2 '}>
+					<Label	htmlFor="darkMode" className="ml-2">🔥 Fun Mode</Label>
+				<Switch	id="darkMode" className="ml-2" onCheckedChange={setFunMode}/>
+				</div>
 			</footer>
 		</div>
 	);
